@@ -1,0 +1,16 @@
+.git
+.gitignore
+
+myenv
+venv
+__pycache__
+
+mlruns
+results
+logs
+
+registered_model
+
+.env
+
+.ipynb_checkpoints

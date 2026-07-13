@@ -8,34 +8,66 @@ from transformers import (
     DistilBertForSequenceClassification,
 )
 
-app = FastAPI()
+from download_from_s3 import download_model
 
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# ---------------------------------------------------
+# Download model from S3 (if not present)
+# ---------------------------------------------------
+
+download_model()
+
+# ---------------------------------------------------
+# FastAPI App
+# ---------------------------------------------------
+
+app = FastAPI(
+    title="Sentiment Analysis API",
+    version="1.0.0",
+)
+
+DEVICE = torch.device(
+    "cuda" if torch.cuda.is_available() else "cpu"
+)
 
 try:
 
-    tokenizer = DistilBertTokenizerFast.from_pretrained("model")
+    tokenizer = DistilBertTokenizerFast.from_pretrained(
+        "registered_model"
+    )
 
-    model = DistilBertForSequenceClassification.from_pretrained("model")
+    model = DistilBertForSequenceClassification.from_pretrained(
+        "registered_model"
+    )
 
     model.to(DEVICE)
-
     model.eval()
 
-except Exception:
+    print("Model Loaded Successfully")
+
+except Exception as e:
 
     tokenizer = None
     model = None
 
+    print(e)
+
+
+# ---------------------------------------------------
+# Request Schema
+# ---------------------------------------------------
 
 class ReviewRequest(BaseModel):
 
     review: str = Field(
         ...,
         min_length=3,
-        description="Customer review text",
+        description="Customer review",
     )
 
+
+# ---------------------------------------------------
+# Home
+# ---------------------------------------------------
 
 @app.get("/")
 def home():
@@ -44,6 +76,10 @@ def home():
         "message": "Sentiment Analysis API Running"
     }
 
+
+# ---------------------------------------------------
+# Health Check
+# ---------------------------------------------------
 
 @app.get("/health")
 def health():
@@ -61,6 +97,10 @@ def health():
     }
 
 
+# ---------------------------------------------------
+# Prediction Endpoint
+# ---------------------------------------------------
+
 @app.post("/predict")
 def predict(data: ReviewRequest):
 
@@ -68,47 +108,38 @@ def predict(data: ReviewRequest):
 
         raise HTTPException(
             status_code=500,
-            detail="Prediction model unavailable.",
+            detail="Model not available",
         )
 
-    try:
+    encoded = tokenizer(
+        data.review,
+        return_tensors="pt",
+        truncation=True,
+        padding=True,
+        max_length=128,
+    )
 
-        encoded = tokenizer(
-            data.review,
-            return_tensors="pt",
-            truncation=True,
-            padding=True,
-            max_length=128,
-        )
+    encoded = {
+        key: value.to(DEVICE)
+        for key, value in encoded.items()
+    }
 
-        encoded = {
-            k: v.to(DEVICE)
-            for k, v in encoded.items()
-        }
+    with torch.no_grad():
 
-        with torch.no_grad():
+        outputs = model(**encoded)
 
-            outputs = model(**encoded)
+        prediction = torch.argmax(
+            outputs.logits,
+            dim=1,
+        ).item()
 
-            prediction = torch.argmax(
-                outputs.logits,
-                dim=1,
-            ).item()
+    labels = {
+        0: "Negative",
+        1: "Neutral",
+        2: "Positive",
+    }
 
-        mapping = {
-            0: "Negative",
-            1: "Neutral",
-            2: "Positive",
-        }
-
-        return {
-            "review": data.review,
-            "prediction": mapping[prediction],
-        }
-
-    except Exception:
-
-        raise HTTPException(
-            status_code=500,
-            detail="Unable to generate prediction.",
-        )
+    return {
+        "review": data.review,
+        "prediction": labels[prediction],
+    }

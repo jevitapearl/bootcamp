@@ -3,10 +3,11 @@ uvicorn
 torch
 transformers
 datasets
-accelerate
 scikit-learn
 pandas
 mlflow
-sentencepiece
-evaluate
-numpy
+boto3
+python-dotenv
+python-multipart
+accelerate
+safetensors
