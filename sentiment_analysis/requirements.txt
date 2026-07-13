@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+torch
+transformers
+datasets
+accelerate
+scikit-learn
+pandas
+mlflow
+sentencepiece
+evaluate
+numpy

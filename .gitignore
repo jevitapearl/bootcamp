@@ -1,0 +1,14 @@
+# sentiment analysis
+sentiment_analysis/myenv
+sentiment_analysis/model
+sentiment_analysis/mlruns
+sentiment_analysis/__pycache__
+sentiment_analysis/results
+
+# model registration
+Model registry/myenv
+Model registry/mlruns
+
+# fastAPI 
+fastAPI_project/__pycache__
+fastAPI_project/load_model.joblib
