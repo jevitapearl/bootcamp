@@ -1,11 +1,10 @@
 fastapi
-uvicorn
-torch
-transformers
+uvicorn[standard]
+torch==2.7.1
+transformers==4.53.2
 datasets
 scikit-learn
 pandas
-mlflow
 boto3
 python-dotenv
 python-multipart
