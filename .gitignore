@@ -1,14 +1,36 @@
-# sentiment analysis
-sentiment_analysis/myenv
-sentiment_analysis/model
-sentiment_analysis/mlruns
-sentiment_analysis/__pycache__
-sentiment_analysis/results
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
 
-# model registration
-Model registry/myenv
-Model registry/mlruns
+# Virtual environments
+myenv/
 
-# fastAPI 
-fastAPI_project/__pycache__
-fastAPI_project/load_model.joblib
+# Environment variables
+.env
+
+# MLflow
+mlruns/
+
+# Models
+model/
+registered_model/
+*.joblib
+*.pkl
+*.skops
+*.onnx
+
+# Results
+results/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
